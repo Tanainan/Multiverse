@@ -25,11 +25,12 @@ setwd("~/Desktop/R Github/Multiverse") #change to correct working directory
 #install.packages("Rmisc")
 library(ggplot2)
 library(Rmisc)
+library(caret)
 
 rm(list = ls())
 
 annlist <- c(1, 2, 3, 4, 5, 6)  # which analyses? 1 = religiosity (study 1), 2 = religiosity (study 2), 3 = fiscal political attitudes,
-                                # 4 = social political attitudes, 5 = voting preferences, 6 = donation preferences  
+# 4 = social political attitudes, 5 = voting preferences, 6 = donation preferences  
 deplist <- c("RelComp","RelComp","FiscConsComp","SocConsComp","Vote","Donate")  # list of dependent variables
 all.data.multiverses <- list()  # all data multiverses for all the analyses specified in annlist
 all.p <- list()  # all p-values for all the analyses specified in annlist
@@ -58,7 +59,7 @@ for (iii in 1:length(annlist)) {  # for each analysis
   mydata.raw$StartDateofLastPeriod <- as.Date(mydata.raw$StartDateofLastPeriod, format = "%m/%d/%y")
   mydata.raw$StartDateofPeriodBeforeLast <- as.Date(mydata.raw$StartDateofPeriodBeforeLast, 
                                                     format = "%m/%d/%y")
-    
+  
   ###### process raw data to create multiverse of data sets
   
   no.nmo <- ifelse(ann == 1, 2, 3)  # number of next menstrual onset assessment (nmo) processing choices
@@ -70,17 +71,17 @@ for (iii in 1:length(annlist)) {  # for each analysis
   data.multiverse <- array(list(), dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of data sets
   p.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of p values
   
-    # data processing ("proc") with a single option
+  # data processing ("proc") with a single option
   
   mydata.proc <- mydata.raw
   
-      # create religiosity score
+  # create religiosity score
   mydata.proc$RelComp <- round(rowMeans(cbind(mydata.proc$Rel1, mydata.proc$Rel2, 
-                                                   mydata.proc$Rel3), na.rm = TRUE), digits = 2)  
+                                              mydata.proc$Rel3), na.rm = TRUE), digits = 2)  
   #or mydata.proc %>% select(Rel1, Rel2, Rel3) %>% cbind() # tidyverse
   
-      # create fiscal and social political attitudes score
-    if (ann > 1) { #reverse coding?
+  # create fiscal and social political attitudes score
+  if (ann > 1) { #reverse coding?
     mydata.proc$Abortion <- abs(7 - mydata.proc$Abortion) + 1 #social
     mydata.proc$StemCell <- abs(7 - mydata.proc$StemCell) + 1 #social
     mydata.proc$Marijuana <- abs(7 - mydata.proc$Marijuana) + 1 #social
@@ -90,11 +91,11 @@ for (iii in 1:length(annlist)) {  # for each analysis
     
     
     mydata.proc$FiscConsComp <- round(rowMeans(cbind(mydata.proc$FreeMarket, 
-                                                          mydata.proc$PrivSocialSec, mydata.proc$RichTax, mydata.proc$StLiving, 
-                                                          mydata.proc$Profit), na.rm = TRUE), digits = 2)  # create fiscal political attitudes score
+                                                     mydata.proc$PrivSocialSec, mydata.proc$RichTax, mydata.proc$StLiving, 
+                                                     mydata.proc$Profit), na.rm = TRUE), digits = 2)  # create fiscal political attitudes score
     mydata.proc$SocConsComp <- round(rowMeans(cbind(mydata.proc$Marriage, 
-                                                         mydata.proc$RestrictAbortion, mydata.proc$Abortion, mydata.proc$StemCell, 
-                                                         mydata.proc$Marijuana), na.rm = TRUE), digits = 2)  # create social political attitudes score
+                                                    mydata.proc$RestrictAbortion, mydata.proc$Abortion, mydata.proc$StemCell, 
+                                                    mydata.proc$Marijuana), na.rm = TRUE), digits = 2)  # create social political attitudes score
   }
   
   mydata.proc.init <- mydata.proc
@@ -106,7 +107,7 @@ for (iii in 1:length(annlist)) {  # for each analysis
       for (k in 1:no.r){  # for each r option
         for (l in 1:no.ecl){  # for each ecl option
           for (m in 1:no.ec){  # for each ec option
-                                      
+            
             mydata.proc <- mydata.proc.init #initialize processed data with variables with a single option only
             
             # next menstrual onset (nmo) assessment
@@ -126,7 +127,7 @@ for (iii in 1:length(annlist)) {  # for each analysis
             # as described in the Supplemental Material, for two participants, we did not manage to recover the value of Cycle Day. When Cycle Day is determined based on nmo1, we
             # adopt the Cycle Day value from the original data file to ensure that the results of our single data set analysis are identical 
             # to the single data set analysis in Durante et al. (2013)
-                        if (ann > 1 & i == 1) {
+            if (ann > 1 & i == 1) {
               mydata.proc$CycleDay[mydata.proc$WorkerID == 15] <- 11
               mydata.proc$CycleDay[mydata.proc$WorkerID == 16] <- 18  
             } # fixing 2 problematic cases
@@ -150,42 +151,42 @@ for (iii in 1:length(annlist)) {  # for each analysis
             
             mydata.proc$Fertility <- rep(NA, dim(mydata.proc)[1])  # create fertility variable
             mydata.proc$Fertility[mydata.proc$CycleDay >= high.lower[j] & mydata.proc$CycleDay <= 
-                                          high.upper[j]] <- "High"  # assign 'High' to fertility if cycle day is within the high fertility range 
+                                    high.upper[j]] <- "High"  # assign 'High' to fertility if cycle day is within the high fertility range 
             mydata.proc$Fertility[mydata.proc$CycleDay >= low1.lower[j] & mydata.proc$CycleDay <= 
-                                          low1.upper[j]] <- "Low"  # assign 'Low' to fertility if cycle day is within the first low fertility range
+                                    low1.upper[j]] <- "Low"  # assign 'Low' to fertility if cycle day is within the first low fertility range
             mydata.proc$Fertility[mydata.proc$CycleDay >= low2.lower[j] & mydata.proc$CycleDay <= 
-                                          low2.upper[j]] <- "Low"  # assign 'Low' to fertility if cycle day is within the second low fertility range
-                
+                                    low2.upper[j]] <- "Low"  # assign 'Low' to fertility if cycle day is within the second low fertility range
+            
             # relationship status assessment
             if (k == 1) {
               mydata.proc$RelationshipStatus <- ifelse(mydata.proc$Relationship <= 
-                                                               2, "Single", "Relationship")  # first r option: single = response options 1 and 2; relationship = response options 3 and 4
+                                                         2, "Single", "Relationship")  # first r option: single = response options 1 and 2; relationship = response options 3 and 4
             } else if (k == 2) {
               mydata.proc$RelationshipStatus <- ifelse(mydata.proc$Relationship == 
-                                                               1, "Single", "Relationship")  # second r option: single = response option 1, relationship = response options 2, 3 and 4
+                                                         1, "Single", "Relationship")  # second r option: single = response option 1, relationship = response options 2, 3 and 4
             } else if (k == 3) {
               mydata.proc$RelationshipStatus[mydata.proc$Relationship == 1] <- "Single"
               mydata.proc$RelationshipStatus[mydata.proc$Relationship > 2 & mydata.proc$Relationship < 
-                                                     5] <- "Relationship"  # third r option: single = response option 1, relationship = response options 3 and 4
+                                               5] <- "Relationship"  # third r option: single = response option 1, relationship = response options 3 and 4
             }
-                      
+            
             # exclusion based on cycle length
             if (l == 1) {
               mydata.proc <- mydata.proc  # first ecl option: no exclusion based on cycle length
             } else if (l == 2) {
               mydata.proc <- mydata.proc[!(mydata.proc$ComputedCycleLength < 
-                                                         25 | mydata.proc$ComputedCycleLength > 35), ]  # second ecl option: exclusion based on computed cycle length
+                                             25 | mydata.proc$ComputedCycleLength > 35), ]  # second ecl option: exclusion based on computed cycle length
             } else if (l == 3) {
               mydata.proc <- mydata.proc[!(mydata.proc$ReportedCycleLength < 
-                                                         25 | mydata.proc$ReportedCycleLength > 35), ]  # third ecl option: exclusion based on reported cycle length
+                                             25 | mydata.proc$ReportedCycleLength > 35), ]  # third ecl option: exclusion based on reported cycle length
             }
-                  
+            
             # exclusion based on certainty ratings
             if (m == 1) {
               mydata.proc <- mydata.proc  # first ec option: no exclusion based on certainty ratings
             } else if (m == 2) {
               mydata.proc <- mydata.proc[!(mydata.proc$Sure1 < 6 | mydata.proc$Sure2 < 
-                                                         6), ]  # second ec option: exclusion based on variables Sure1 and Sure2
+                                             6), ]  # second ec option: exclusion based on variables Sure1 and Sure2
             }
             
             data.multiverse[[i, j, k, l, m]] = mydata.proc  # store processed data set in the data multiverse
@@ -194,26 +195,25 @@ for (iii in 1:length(annlist)) {  # for each analysis
       }
     }
   }                     
-            
-  ###### analyze multiverse of data sets to create multiverse of statistical results #######################################################
   
+  ###### analyze multiverse of data sets to create multiverse of statistical results #######################################################
+
   for (i in 1:no.nmo){  # for each nmo option
     for (j in 1:no.f){  # for each f option
       for (k in 1:no.r){  # for each r option
         for (l in 1:no.ecl){  # for each ecl option
           for (m in 1:no.ec){  # for each ec option
-                        
+            
             mydata.proc$Fertility <- factor(mydata.proc$Fertility)
             mydata.proc$RelationshipStatus <- factor(mydata.proc$RelationshipStatus)
             if (ann <= 4) {
-              an = lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), data.multiverse[[i, j, k, l, m]])  # for analyses 1 to 4, perform an ANOVA on the processed data set 
+              an0 = varImp(lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), data.multiverse[[i, j, k, l, m]]))  # for analyses 1 to 4, perform an ANOVA on the processed data set 
             }
             if (ann >= 5) {
-              an = glm(paste(deplist[ann], "~Fertility*RelationshipStatus"), family = binomial(link = "logit"), 
-                               data.multiverse[[i, j, k, l, m]])  # for analyses 5 and 6, perform a logistic regression on the processed data set
+              an0 = varImp(glm(paste(deplist[ann], "~Fertility*RelationshipStatus"), family = binomial(link = "logit"), 
+                              data.multiverse[[i, j, k, l, m]]))  # for analyses 5 and 6, perform a logistic regression on the processed data set
             }
-            summar <- summary(an)
-            p.multiverse[i, j, k, l, m] <- summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+            p.multiverse[i, j, k, l, m] <- an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
             
           }
         }
@@ -263,8 +263,8 @@ for (iii in 1:length(annlist)) local({
   pv[[ann]]=df$value
   hists[[ann]] <<- qplot(pv[[ann]], geom = "histogram", binwidth = 0.01) + xlim(0,1) + geom_histogram(colour = "black", fill = "white", binwidth = 0.01) + 
     xlab(xlabs[[ann]]) + ylab(ylabs[[ann]]) + geom_vline(xintercept = 0.05, colour = "red", 
-                                               linetype = "longdash") + ggtitle(graphnames[ann]) + theme(plot.title = element_text(lineheight = 0.8, 
-                                                                                                                                   face = "bold")) + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 16))
+                                                         linetype = "longdash") + ggtitle(graphnames[ann]) + theme(plot.title = element_text(lineheight = 0.8, 
+                                                                                                                                             face = "bold")) + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 16))
   #windows(8, 5)
   print(hists[[ann]])
   rm(p)
@@ -277,7 +277,7 @@ for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,
   ann <- annlist[iii]
   p <- all.p[[ann]]
   p.grid <- array(0,dim=c(no.f, no.r, no.ec, no.ecl, no.nmo))  # change the dimensions of the p multiverse for visualization purposes
-    for (jj in 1:3){
+  for (jj in 1:3){
     for (jjj in 1:3){
       p.grid[, , , jj, jjj] <- p[jjj, , , jj, ]
     }
@@ -288,8 +288,8 @@ for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,
                                                                 (p.grid[!is.na(p.grid)])))
   df[["sign"]] = ifelse(df[["value"]] <= 0.05, "significant", "nonsignificant")
   grids[[ann]] <- ggplot(df, aes(x = category1, y = category2, fill = sign)) +
-   geom_tile(colour = "black") +
-  geom_text(label = round((df$value), 2), size = 3, colour = "black") + 
+    geom_tile(colour = "black") +
+    geom_text(label = round((df$value), 2), size = 3, colour = "black") + 
     # draw relationship branches vertical
     geom_segment(aes(x = 3, y = -1.7, xend = 3, yend = -0.3)) + 
     geom_segment(aes(x = 8, y = -1.7, xend = 8, yend = -0.3)) + 
@@ -378,9 +378,9 @@ for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,
   #windows(10, 7)
   
   print(grids[ann])
-    rm(df)
-    rm(p)
-    rm(p.grid)
+  rm(df)
+  rm(p)
+  rm(p.grid)
 }
 
 

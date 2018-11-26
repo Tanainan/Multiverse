@@ -21,8 +21,9 @@
 
 setwd("~/Desktop/R Github/Multiverse") #change to correct working directory
 
-#install.packages("ggplot2")
-#install.packages("Rmisc")
+install.packages("ggplot2")
+install.packages("Rmisc")
+install.packages("caret")
 library(ggplot2)
 library(Rmisc)
 library(caret)
@@ -261,10 +262,10 @@ for (iii in 1:length(annlist)) local({
   df <- data.frame(category1 = cat1, category2 = cat2, value = (as.vector(p[!is.na(p)])))
   df[["sign"]] = ifelse(df[["value"]] <= 0.05, "significant", "nonsignificant")
   pv[[ann]]=df$value
-  hists[[ann]] <<- qplot(pv[[ann]], geom = "histogram", binwidth = 0.01) + xlim(0,1) + geom_histogram(colour = "black", fill = "white", binwidth = 0.01) + 
-    xlab(xlabs[[ann]]) + ylab(ylabs[[ann]]) + geom_vline(xintercept = 0.05, colour = "red", 
-                                                         linetype = "longdash") + ggtitle(graphnames[ann]) + theme(plot.title = element_text(lineheight = 0.8, 
-                                                                                                                                             face = "bold")) + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 16))
+  hists[[ann]] <<- qplot(pv[[ann]], geom = "histogram", binwidth = 0.01) + #xlim(0,1) + 
+    geom_histogram(colour = "black", binwidth = 0.01, fill = "white") + 
+    xlab(xlabs[[ann]]) + ylab(ylabs[[ann]]) + #geom_vline(xintercept = 0.05, colour = "red", linetype = "longdash") + 
+    ggtitle(graphnames[ann]) + theme(plot.title = element_text(lineheight = 0.8, face = "bold")) + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 16))
   #windows(8, 5)
   print(hists[[ann]])
   rm(p)
@@ -367,7 +368,7 @@ for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,
     annotate("text", x = 18, y = c(9, 11, 13), label = c("ECL1", "ECL2", "ECL3")) + 
     annotate("text", x = 16, y = c(0.7, 1.7, 2.7, 3.7, 4.7, 5.7, 6.7, 7.7, 8.7, 
                                    9.7, 10.7, 11.7, 12.7, 13.7), label = rep(c("EC1", "EC2"), 7)) + 
-    scale_fill_manual(values = c(significant = "grey", nonsignificant = "white")) + 
+    scale_fill_manual(values = c(significant = "grey", nonsignificant = "white")) + #########
     scale_x_discrete(expand = c(0, 0)) + scale_y_reverse() + ggtitle(graphnames[ann]) + 
     theme(plot.title = element_text(lineheight = 0.8, face = "bold")) + 
     theme(panel.grid.minor = element_blank()) + theme(panel.grid.major = element_blank()) + 

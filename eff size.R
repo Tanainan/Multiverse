@@ -52,8 +52,8 @@ for (iii in 1:length(annlist)) {  # for each analysis
 ######
 ######
   #rm(list = setdiff(ls(), c("annlist", "deplist", "all.efffer", "all.data.multiverses", "iii")))
-  #rm(list = setdiff(ls(), c("annlist", "deplist", "all.effrela", "all.data.multiverses", "iii")))
-  rm(list = setdiff(ls(), c("annlist", "deplist", "all.effinter", "all.data.multiverses","iii")))
+  rm(list = setdiff(ls(), c("annlist", "deplist", "all.effrela", "all.data.multiverses", "iii")))
+  #rm(list = setdiff(ls(), c("annlist", "deplist", "all.effinter", "all.data.multiverses","iii")))
   
   ann <- annlist[iii] #create analysis identifier
   
@@ -84,8 +84,8 @@ for (iii in 1:length(annlist)) {  # for each analysis
 ######  
   data.multiverse <- array(list(), dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of data sets
   #efffer.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size fertility
-  #effrela.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size relationship status
-  effinter.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size interaction
+  effrela.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size relationship status
+  #effinter.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size interaction
   
   # data processing ("proc") with a single option
   
@@ -245,9 +245,9 @@ for (iii in 1:length(annlist)) {  # for each analysis
 ######
 ######
             
-            #if (ann == 1) {efffer.multiverse[i, j, k, l, m] <- an0[2,3]/sqrt(502)} else {efffer.multiverse[i, j, k, l, m] <- an0[2,3]/sqrt(275)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
-            #if (ann == 1) {effrela.multiverse[i, j, k, l, m] <- an0[3,3]/sqrt(502)} else {effrela.multiverse[i, j, k, l, m] <- an0[3,3]/sqrt(275)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
-            if (ann == 1) {effinter.multiverse[i, j, k, l, m] <- an0[4,3]/sqrt(502)} else {effinter.multiverse[i, j, k, l, m] <- an0[4,3]/sqrt(275)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+            #if (ann == 1) {efffer.multiverse[i, j, k, l, m] <- an0[2,3]/sqrt(275)} else {efffer.multiverse[i, j, k, l, m] <- an0[2,3]/sqrt(502)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+            if (ann == 1) {effrela.multiverse[i, j, k, l, m] <- an0[3,3]/sqrt(275)} else {effrela.multiverse[i, j, k, l, m] <- an0[3,3]/sqrt(502)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+            #if (ann == 1) {effinter.multiverse[i, j, k, l, m] <- an0[4,3]/sqrt(275)} else {effinter.multiverse[i, j, k, l, m] <- an0[4,3]/sqrt(502)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
             
           }
         }
@@ -260,11 +260,11 @@ for (iii in 1:length(annlist)) {  # for each analysis
 ######
   
   #efffer.multiverse[1, , , 3, ] <- NA
-  #effrela.multiverse[1, , , 3, ] <- NA
-  effinter.multiverse[1, , , 3, ] <- NA  # when participants are excluded based on reported cycle length, we do not consider cycle day assessment based on computed cycle length 
+  effrela.multiverse[1, , , 3, ] <- NA
+  #effinter.multiverse[1, , , 3, ] <- NA  # when participants are excluded based on reported cycle length, we do not consider cycle day assessment based on computed cycle length 
   #efffer.multiverse[2, , , 2, ] <- NA
-  #effrela.multiverse[2, , , 2, ] <- NA
-  effinter.multiverse[2, , , 2, ] <- NA  # when participants are excluded based on computed cycle length, we do not consider cycle day assessment based on reported cycle length
+  effrela.multiverse[2, , , 2, ] <- NA
+  #effinter.multiverse[2, , , 2, ] <- NA  # when participants are excluded based on computed cycle length, we do not consider cycle day assessment based on reported cycle length
   
   all.data.multiverses[[iii]] <- data.multiverse
   
@@ -273,13 +273,13 @@ for (iii in 1:length(annlist)) {  # for each analysis
 ######
   
   #all.efffer[[iii]] <- efffer.multiverse
-  #all.effrela[[iii]] <- effrela.multiverse
-  all.effinter[[iii]] <- effinter.multiverse
+  all.effrela[[iii]] <- effrela.multiverse
+  #all.effinter[[iii]] <- effinter.multiverse
   
 }
 
 # as a check, show the results of the single data set analyses by durante et. al (2013) 
-sapply(all.p, "[[", 1)
+#sapply(all.p, "[[", 1)
 
 # compute the proportion of data sets with a significant interaction effect (p.707)
 # f <- function (ann) {length(which(all.p[[ann]]>.05))/length(which(!is.na(all.p[[ann]])))}
@@ -315,8 +315,8 @@ for (iii in 1:length(annlist)) local({
 ######
   
   #p <- all.efffer[[ann]]
-  #p <- all.effrela[[ann]]
-  p <- all.effinter[[ann]]
+  p <- all.effrela[[ann]]
+  #p <- all.effinter[[ann]]
   if (ann == 1) {
     cat1 <- rep(c(1:15), 8)
     cat2 <- rep(1:8, each = 15)
@@ -355,8 +355,8 @@ for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,
 ######
   
   #p <- all.efffer[[ann]]
-  #p <- all.effrela[[ann]]
-  p <- all.effinter[[ann]]
+  p <- all.effrela[[ann]]
+  #p <- all.effinter[[ann]]
   p.grid <- array(0,dim=c(no.f, no.r, no.ec, no.ecl, no.nmo))  # change the dimensions of the p multiverse for visualization purposes
   for (jj in 1:3){
     for (jjj in 1:3){

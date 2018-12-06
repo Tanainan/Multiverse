@@ -27,6 +27,10 @@ setwd("~/Desktop/R Github/Multiverse") #change to correct working directory
 library(ggplot2)
 library(Rmisc)
 library(caret)
+library(lm.beta)
+library(reghelper)
+library(glmnet)
+library(tidyverse)
 
 rm(list = ls())
 
@@ -34,7 +38,9 @@ annlist <- c(1, 2, 3, 4, 5, 6)  # which analyses? 1 = religiosity (study 1), 2 =
 # 4 = social political attitudes, 5 = voting preferences, 6 = donation preferences  
 deplist <- c("RelComp","RelComp","FiscConsComp","SocConsComp","Vote","Donate")  # list of dependent variables
 all.data.multiverses <- list()  # all data multiverses for all the analyses specified in annlist
-all.p <- list()  # all p-values for all the analyses specified in annlist
+all.efffer <- list()  # all eff size for fertility for all the analyses specified in annlist
+all.effrela <- list()
+all.effinter <- list()
 
 ##############################################################################################
 ######################## compute multiverse of statistical results ###########################
@@ -42,8 +48,12 @@ all.p <- list()  # all p-values for all the analyses specified in annlist
 
 for (iii in 1:length(annlist)) {  # for each analysis
   
-  rm(list = setdiff(ls(), c("annlist", "deplist", "all.p", "all.data.multiverses", 
-                            "iii")))
+######
+######
+######
+  #rm(list = setdiff(ls(), c("annlist", "deplist", "all.efffer", "all.data.multiverses", "iii")))
+  #rm(list = setdiff(ls(), c("annlist", "deplist", "all.effrela", "all.data.multiverses", "iii")))
+  rm(list = setdiff(ls(), c("annlist", "deplist", "all.effinter", "all.data.multiverses","iii")))
   
   ann <- annlist[iii] #create analysis identifier
   
@@ -69,8 +79,13 @@ for (iii in 1:length(annlist)) {  # for each analysis
   no.ecl <- 3  # number of exclusion based on cycle length (ecl) processing choices
   no.ec <- 2  # number of exclusion based on certainty ratings (ec) processing choices
   
+######
+######
+######  
   data.multiverse <- array(list(), dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of data sets
-  p.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of p values
+  #efffer.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size fertility
+  #effrela.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size relationship status
+  effinter.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of eff size interaction
   
   # data processing ("proc") with a single option
   
@@ -208,13 +223,31 @@ for (iii in 1:length(annlist)) {  # for each analysis
             mydata.proc$Fertility <- factor(mydata.proc$Fertility)
             mydata.proc$RelationshipStatus <- factor(mydata.proc$RelationshipStatus)
             if (ann <= 4) {
-              an0 = varImp(lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), data.multiverse[[i, j, k, l, m]]))  # for analyses 1 to 4, perform an ANOVA on the processed data set 
-            }
+              # an0 = varImp(lm.beta(lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), 
+              #         data.multiverse[[i, j, k, l, m]])))  # for analyses 1 to 4, perform an ANOVA on the processed data set 
+              # an0 = varImp(lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), 
+              #         data.multiverse[[i, j, k, l, m]]))  # for analyses 1 to 4, perform an ANOVA on the processed data set 
+              # an0 = coef(summary(lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), 
+              #         data.multiverse[[i, j, k, l, m]])))[,"Std. Error"]
+              an0 = coef(summary(lm(paste(deplist[ann], "~Fertility*RelationshipStatus"), 
+                      data.multiverse[[i, j, k, l, m]])))
+                          }
             if (ann >= 5) {
-              an0 = varImp(glm(paste(deplist[ann], "~Fertility*RelationshipStatus"), family = binomial(link = "logit"), 
-                              data.multiverse[[i, j, k, l, m]]))  # for analyses 5 and 6, perform a logistic regression on the processed data set
+              # an0 = varImp(glm(paste(deplist[ann], "~Fertility*RelationshipStatus"), family = binomial(link = "logit"), 
+              #                 data.multiverse[[i, j, k, l, m]]))  # for analyses 5 and 6, perform a logistic regression on the processed data set
+              an0 = coef(summary(glm(paste(deplist[ann], "~Fertility*RelationshipStatus"), family = binomial(link = "logit"), 
+                      data.multiverse[[i, j, k, l, m]])))
+              # an0 = coef(summary(glm(paste(deplist[ann], "~Fertility*RelationshipStatus"), family = binomial(link = "logit"), 
+              #         data.multiverse[[i, j, k, l, m]])))[,"Std. Error"]
             }
-            p.multiverse[i, j, k, l, m] <- an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+
+######
+######
+######
+            
+            #if (ann == 1) {efffer.multiverse[i, j, k, l, m] <- an0[2,3]/sqrt(502)} else {efffer.multiverse[i, j, k, l, m] <- an0[2,3]/sqrt(275)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+            #if (ann == 1) {effrela.multiverse[i, j, k, l, m] <- an0[3,3]/sqrt(502)} else {effrela.multiverse[i, j, k, l, m] <- an0[3,3]/sqrt(275)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
+            if (ann == 1) {effinter.multiverse[i, j, k, l, m] <- an0[4,3]/sqrt(502)} else {effinter.multiverse[i, j, k, l, m] <- an0[4,3]/sqrt(275)} # an0[3,] #summar$coefficients[4, 4]  # store the p-value of the fertility x relationship interaction 
             
           }
         }
@@ -222,11 +255,26 @@ for (iii in 1:length(annlist)) {  # for each analysis
     }
   }
   
-  p.multiverse[1, , , 3, ] <- NA  # when participants are excluded based on reported cycle length, we do not consider cycle day assessment based on computed cycle length 
-  p.multiverse[2, , , 2, ] <- NA  # when participants are excluded based on computed cycle length, we do not consider cycle day assessment based on reported cycle length
+######
+######
+######
+  
+  #efffer.multiverse[1, , , 3, ] <- NA
+  #effrela.multiverse[1, , , 3, ] <- NA
+  effinter.multiverse[1, , , 3, ] <- NA  # when participants are excluded based on reported cycle length, we do not consider cycle day assessment based on computed cycle length 
+  #efffer.multiverse[2, , , 2, ] <- NA
+  #effrela.multiverse[2, , , 2, ] <- NA
+  effinter.multiverse[2, , , 2, ] <- NA  # when participants are excluded based on computed cycle length, we do not consider cycle day assessment based on reported cycle length
   
   all.data.multiverses[[iii]] <- data.multiverse
-  all.p[[iii]] <- p.multiverse
+  
+######
+######  
+######
+  
+  #all.efffer[[iii]] <- efffer.multiverse
+  #all.effrela[[iii]] <- effrela.multiverse
+  all.effinter[[iii]] <- effinter.multiverse
   
 }
 
@@ -236,6 +284,16 @@ sapply(all.p, "[[", 1)
 # compute the proportion of data sets with a significant interaction effect (p.707)
 # f <- function (ann) {length(which(all.p[[ann]]>.05))/length(which(!is.na(all.p[[ann]])))}
 # sapply(annlist,f) 
+
+
+
+
+
+
+
+
+
+
 
 ########################################################
 ######################## make graphs ###################
@@ -251,7 +309,14 @@ ylabs=c("Frequency","Frequency","Frequency","Frequency","Frequency","Frequency")
 xlabs=c("Effect Size","Effect Size","Effect Size","Effect Size","Effect Size","Effect Size")
 for (iii in 1:length(annlist)) local({
   ann <- annlist[iii]
-  p <- all.p[[ann]]
+
+######
+######
+######
+  
+  #p <- all.efffer[[ann]]
+  #p <- all.effrela[[ann]]
+  p <- all.effinter[[ann]]
   if (ann == 1) {
     cat1 <- rep(c(1:15), 8)
     cat2 <- rep(1:8, each = 15)
@@ -272,11 +337,26 @@ for (iii in 1:length(annlist)) local({
   rm(df)
 })
 
+
+
+
+
+
+
+
+
 # grids of effect size
 grids <- list()
 for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,5, and 6
   ann <- annlist[iii]
-  p <- all.p[[ann]]
+  
+######
+######
+######
+  
+  #p <- all.efffer[[ann]]
+  #p <- all.effrela[[ann]]
+  p <- all.effinter[[ann]]
   p.grid <- array(0,dim=c(no.f, no.r, no.ec, no.ecl, no.nmo))  # change the dimensions of the p multiverse for visualization purposes
   for (jj in 1:3){
     for (jjj in 1:3){

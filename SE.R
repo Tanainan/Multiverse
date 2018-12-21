@@ -52,8 +52,8 @@ for (iii in 1:length(annlist)) {  # for each analysis
   ######
   ######
   #rm(list = setdiff(ls(), c("annlist", "deplist", "all.SEfer", "all.data.multiverses", "iii")))
-  rm(list = setdiff(ls(), c("annlist", "deplist", "all.SErela", "all.data.multiverses", "iii")))
-  #rm(list = setdiff(ls(), c("annlist", "deplist", "all.SEinter", "all.data.multiverses","iii")))
+  #rm(list = setdiff(ls(), c("annlist", "deplist", "all.SErela", "all.data.multiverses", "iii")))
+  rm(list = setdiff(ls(), c("annlist", "deplist", "all.SEinter", "all.data.multiverses","iii")))
   
   ann <- annlist[iii] #create analysis identifier
   
@@ -84,8 +84,8 @@ for (iii in 1:length(annlist)) {  # for each analysis
   ######  
   data.multiverse <- array(list(), dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of data sets
   #SEfer.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of SE size fertility
-  SErela.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of SE size relationship status
-  #SEinter.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of SE size interaction
+  #SErela.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of SE size relationship status
+  SEinter.multiverse <- array(0, dim = c(no.nmo, no.f, no.r, no.ecl, no.ec))  # multiverse of SE size interaction
   
   # data processing ("proc") with a single option
   
@@ -246,8 +246,8 @@ for (iii in 1:length(annlist)) {  # for each analysis
             ######
             
             #SEfer.multiverse[i, j, k, l, m] <- an0[2,2]
-            SErela.multiverse[i, j, k, l, m] <- an0[3,2]
-            #SEinter.multiverse[i, j, k, l, m] <- an0[4,2]
+            #SErela.multiverse[i, j, k, l, m] <- an0[3,2]
+            SEinter.multiverse[i, j, k, l, m] <- an0[4,2]
             
           }
         }
@@ -260,11 +260,11 @@ for (iii in 1:length(annlist)) {  # for each analysis
   ######
   
   #SEfer.multiverse[1, , , 3, ] <- NA
-  SErela.multiverse[1, , , 3, ] <- NA
-  #SEinter.multiverse[1, , , 3, ] <- NA  # when participants are excluded based on reported cycle length, we do not consider cycle day assessment based on computed cycle length 
+  #SErela.multiverse[1, , , 3, ] <- NA
+  SEinter.multiverse[1, , , 3, ] <- NA  # when participants are excluded based on reported cycle length, we do not consider cycle day assessment based on computed cycle length 
   #SEfer.multiverse[2, , , 2, ] <- NA
-  SErela.multiverse[2, , , 2, ] <- NA
-  #SEinter.multiverse[2, , , 2, ] <- NA  # when participants are excluded based on computed cycle length, we do not consider cycle day assessment based on reported cycle length
+  #SErela.multiverse[2, , , 2, ] <- NA
+  SEinter.multiverse[2, , , 2, ] <- NA  # when participants are excluded based on computed cycle length, we do not consider cycle day assessment based on reported cycle length
   
   all.data.multiverses[[iii]] <- data.multiverse
   
@@ -273,8 +273,8 @@ for (iii in 1:length(annlist)) {  # for each analysis
   ######
   
   #all.SEfer[[iii]] <- SEfer.multiverse
-  all.SErela[[iii]] <- SErela.multiverse
-  #all.SEinter[[iii]] <- SEinter.multiverse
+  #all.SErela[[iii]] <- SErela.multiverse
+  all.SEinter[[iii]] <- SEinter.multiverse
   
 }
 
@@ -315,8 +315,8 @@ for (iii in 1:length(annlist)) local({
   ######
   
   #p <- all.SEfer[[ann]]
-  p <- all.SErela[[ann]]
-  #p <- all.SEinter[[ann]]
+  #p <- all.SErela[[ann]]
+  p <- all.SEinter[[ann]]
   if (ann == 1) {
     cat1 <- rep(c(1:15), 8)
     cat2 <- rep(1:8, each = 15)
@@ -355,8 +355,8 @@ for (iii in c(2,4,5,6)){ #in the paper, we only show the grids for analyses 2,4,
   ######
   
   #p <- all.SEfer[[ann]]
-  p <- all.SErela[[ann]]
-  #p <- all.SEinter[[ann]]
+  #p <- all.SErela[[ann]]
+  p <- all.SEinter[[ann]]
   p.grid <- array(0,dim=c(no.f, no.r, no.ec, no.ecl, no.nmo))  # change the dimensions of the p multiverse for visualization purposes
   for (jj in 1:3){
     for (jjj in 1:3){

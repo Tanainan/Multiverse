@@ -52,6 +52,9 @@ annlist <- c(1) #number of iteration
 all.data.multiverses <- list()
 all.cor <- list()
 avg.cor <- list()
+sd.cor <- list()
+max.cor <- list()
+signi.cor <- list()
 
 for (i in 1:length(annlist)){
   #rm(list = setdiff(ls(), c("annlist", "all.cor", "all.data.multiverses", "i")))
@@ -72,13 +75,14 @@ for (i in 1:length(annlist)){
     y2 ~~ 0.36*y2
     '
 
-  no.it <- 500
+  no.it <- 100
   no.x <- 2
   no.y <- 2
   no.z <- 2
   
   data.multiverse <- array(list(), dim = c(no.it, no.x, no.y, no.z))
   cor.multiverse <- array(0, dim = c(no.it, no.x, no.y, no.z))
+  cor.signi <- array(0, dim = c(no.it, no.x, no.y, no.z))
   
   for (a in 1:no.it){
   data <- simulateData(model = model, model.type = "sem",
@@ -117,13 +121,19 @@ for (i in 1:length(annlist)){
             select(x, y)
           an = cor(dt$y, dt$x)
           cor.multiverse[a, j, k, l] <- an
+          
+          test <- cor.test(dt$y, dt$x)
+          if (test$p.value < .05)
+          {cor.signi[a, j, k, l] <- test$estimate} else cor.signi[a, j, k, l] <- NA}
         
         #se.multiverse[j, k, l] <- an[2,2]
           avg.cor[[a]] = mean(cor.multiverse[a,,,])
+          sd.cor[[a]] = sd(cor.multiverse[a,,,])
+          max.cor[[a]] = max(cor.multiverse[a,,,])
+          signi.cor[[a]] = mean(cor.signi[a,,,], na.rm = T) # mean of only significant correlations in iteration a
         }
       }     
     } 
-   
   }
   
   all.data.multiverses[[i]] <- data.multiverse
@@ -132,5 +142,6 @@ for (i in 1:length(annlist)){
 
 
 # plot corr
-barplot(table(round(unlist(avg.cor), digits = 2)), xlab = "Correlation", ylab = "Freq", main = "Correlation: 500 iterations (N = 100)")
+barplot(table(round(unlist(avg.cor), digits = 2)), xlab = "Correlation", ylab = "Freq", main = "Mean of Correlation: 500 iterations (N = 100)")
+barplot(table(round(cor.multiverse[1,,,], digits = 2)), xlab = "Correlation", ylab = "Freq", main = "Mean of Correlation: 500 iterations (N = 100)")
 

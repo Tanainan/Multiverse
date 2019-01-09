@@ -174,7 +174,7 @@ for (i in 1:length(annlist)){ # since annlist = 1 >> compute 1 time for the whol
   all.z[[i]] <- z.multiverse
   all.p[[i]] <- p.multiverse
 }
-
+# the orders of dimensions are flexible.
 
 # plot multiverse distributions for each iteration
 par(mfrow = c(2,2)) # make 4 distributions to be on the same page
